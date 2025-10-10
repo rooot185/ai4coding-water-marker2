@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>WaterMarker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="panel-controls">
+            <h2>Controls</h2>
+            <div class="control-group">
+                <button id="import-btn">Import Images</button>
+                <button id="import-folder-btn">Import Folder</button>
+            </div>
+            <div class="control-group">
+                <h3>Text Watermark</h3>
+                <label for="wm-text">Text</label>
+                <input type="text" id="wm-text" placeholder="Enter watermark text">
+
+                <label for="wm-size">Font Size</label>
+                <input type="number" id="wm-size" value="48">
+                
+                <label for="wm-opacity">Opacity</label>
+                <input type="range" id="wm-opacity" min="0" max="1" step="0.1" value="0.5">
+
+                <label for="wm-color">Color</label>
+                <input type="color" id="wm-color" value="#FFFFFF">
+            </div>
+
+            <div class="control-group">
+                <h3>Position</h3>
+                <div class="position-grid">
+                    <button class="pos-btn" data-position="top-left"></button>
+                    <button class="pos-btn" data-position="top-center"></button>
+                    <button class="pos-btn" data-position="top-right"></button>
+                    <button class="pos-btn" data-position="center-left"></button>
+                    <button class="pos-btn" data-position="center"></button>
+                    <button class="pos-btn" data-position="center-right"></button>
+                    <button class="pos-btn" data-position="bottom-left"></button>
+                    <button class="pos-btn" data-position="bottom-center"></button>
+                    <button class="pos-btn" data-position="bottom-right"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-image-list">
+            <h2>Image List</h2>
+            <ul id="image-list">
+                <!-- Imported images will be listed here -->
+            </ul>
+        </div>
+
+        <div class="panel-preview">
+            <h2>Preview</h2>
+            <div id="preview-area">
+                <p>Drag & Drop files here or use the import buttons.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

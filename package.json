@@ -1,0 +1,15 @@
+{
+  "name": "water-marker",
+  "version": "1.0.0",
+  "description": "A desktop application to add watermarks to images.",
+  "main": "main.js",
+  "author": "Gemini",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^38.2.2",
+    "electron-builder": "^26.0.12",
+    "sharp": "^0.34.4"
+  }
+}
