@@ -3,13 +3,57 @@
   "version": "1.0.0",
   "description": "A desktop application to add watermarks to images.",
   "main": "main.js",
-  "author": "Gemini",
+  "author": "QYF",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "release": "electron-builder --win --publish always"
   },
   "devDependencies": {
     "electron": "^38.2.2",
     "electron-builder": "^26.0.12",
     "sharp": "^0.34.4"
+  },
+  "build": {
+    "appId": "com.watermarker.app",
+    "productName": "WaterMarker",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "ia32"]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.graphics-design",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Graphics",
+      "icon": "assets/icon.png"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "rooot185",
+      "repo": "ai4coding-water-marker2"
+    }
   }
 }
