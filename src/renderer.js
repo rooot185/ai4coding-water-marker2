@@ -12,6 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const wmColorInput = document.getElementById('wm-color');
     const positionGrid = document.querySelector('.position-grid');
 
+    // Export Controls
+    const exportBtn = document.getElementById('export-btn');
+    const namePrefixInput = document.getElementById('name-prefix');
+    const nameSuffixInput = document.getElementById('name-suffix');
+    const progressContainer = document.getElementById('progress-container');
+    const progressBarInner = document.getElementById('progress-bar-inner');
+    const progressLabel = document.getElementById('progress-label');
+
     // --- State Management ---
     const importedFiles = new Map(); // Using Map to store file path and metadata
     let selectedFilePath = null;
@@ -152,6 +160,66 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.classList.add('active');
             updateWatermarkPreview();
         }
+    });
+
+    // Export Button Listener
+    exportBtn.addEventListener('click', async () => {
+        if (importedFiles.size === 0) {
+            alert('Please import images first!');
+            return;
+        }
+
+        if (!watermarkState.text || watermarkState.text.trim() === '') {
+            alert('Please enter watermark text!');
+            return;
+        }
+
+        // Collect export settings
+        const exportSettings = {
+            watermark: {
+                text: watermarkState.text,
+                size: watermarkState.size,
+                opacity: watermarkState.opacity,
+                color: watermarkState.color,
+                position: watermarkState.position
+            },
+            naming: {
+                prefix: namePrefixInput.value || '',
+                suffix: nameSuffixInput.value || ''
+            },
+            files: Array.from(importedFiles.keys())
+        };
+
+        // Show progress container
+        progressContainer.style.display = 'block';
+        progressBarInner.style.width = '0%';
+        progressLabel.textContent = 'Exporting...';
+        exportBtn.disabled = true;
+
+        try {
+            const result = await window.electronAPI.invoke('export-images', exportSettings);
+
+            if (result.success) {
+                progressBarInner.style.width = '100%';
+                progressLabel.textContent = `Successfully exported ${result.count} images!`;
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                }, 3000);
+            } else {
+                progressLabel.textContent = `Export failed: ${result.error}`;
+            }
+        } catch (error) {
+            progressLabel.textContent = `Export error: ${error.message}`;
+        } finally {
+            exportBtn.disabled = false;
+        }
+    });
+
+    // Listen for progress updates from main process
+    window.electronAPI.on('export-progress', (data) => {
+        const percentage = (data.current / data.total) * 100;
+        progressBarInner.style.width = `${percentage}%`;
+        progressLabel.textContent = `Exporting ${data.current} of ${data.total}...`;
     });
 
     // --- Initial Setup ---

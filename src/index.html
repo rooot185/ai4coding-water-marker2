@@ -42,6 +42,24 @@
                     <button class="pos-btn" data-position="bottom-right"></button>
                 </div>
             </div>
+
+            <div class="control-group">
+                <h3>Export Settings</h3>
+                <label for="name-prefix">Filename Prefix</label>
+                <input type="text" id="name-prefix" placeholder="e.g., wm_">
+                
+                <label for="name-suffix">Filename Suffix</label>
+                <input type="text" id="name-suffix" placeholder="e.g., _watermarked">
+
+                <button id="export-btn" class="export-button">Export All</button>
+            </div>
+
+            <div class="progress-container" id="progress-container" style="display: none;">
+                <p id="progress-label">Exporting...</p>
+                <div class="progress-bar">
+                    <div class="progress-bar-inner" id="progress-bar-inner" style="width: 0%;"></div>
+                </div>
+            </div>
         </div>
 
         <div class="panel-image-list">
