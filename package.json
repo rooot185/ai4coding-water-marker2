@@ -11,10 +11,12 @@
     "build:linux": "electron-builder --linux",
     "release": "electron-builder --win --publish always"
   },
+  "dependencies": {
+    "sharp": "^0.34.4"
+  },
   "devDependencies": {
     "electron": "^38.2.2",
-    "electron-builder": "^26.0.12",
-    "sharp": "^0.34.4"
+    "electron-builder": "^26.0.12"
   },
   "build": {
     "appId": "com.watermarker.app",
@@ -25,7 +27,11 @@
     "files": [
       "main.js",
       "src/**/*",
-      "package.json"
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/sharp/**/*"
     ],
     "win": {
       "target": [
@@ -54,13 +60,6 @@
       "provider": "github",
       "owner": "rooot185",
       "repo": "ai4coding-water-marker2"
-    },
-    "extraResources": [
-      {
-        "from": "node_modules/sharp/build/Release",
-        "to": "resources/sharp",
-        "filter": ["**/*"]
-      }
-    ]
+    }
   }
 }
