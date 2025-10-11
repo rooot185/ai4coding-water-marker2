@@ -57,9 +57,9 @@
     },
     "extraResources": [
       {
-        "from": "node_modules/sharp/build/Release", // sharp 编译后的二进制路径
-        "to": "resources/sharp", // 输出到打包后的 resources 目录
-        "filter": ["**/*"] // 复制所有文件
+        "from": "node_modules/sharp/build/Release",
+        "to": "resources/sharp",
+        "filter": ["**/*"]
       }
     ]
   }
