@@ -44,6 +44,22 @@
             </div>
 
             <div class="control-group">
+                <h3>Watermark Templates</h3>
+                <div class="template-save-group">
+                    <input type="text" id="template-name" placeholder="New template name">
+                    <button id="save-template-btn">Save</button>
+                </div>
+                <label for="template-select" style="margin-top: 10px;">Load or Delete Template</label>
+                <div class="template-load-group">
+                    <select id="template-select">
+                        <option value="">Select a template</option>
+                    </select>
+                    <button id="load-template-btn">Load</button>
+                    <button id="delete-template-btn">Delete</button>
+                </div>
+            </div>
+
+            <div class="control-group">
                 <h3>Export Settings</h3>
                 <label for="name-prefix">Filename Prefix</label>
                 <input type="text" id="name-prefix" placeholder="e.g., wm_">

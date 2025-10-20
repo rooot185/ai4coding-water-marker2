@@ -12,6 +12,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const wmColorInput = document.getElementById('wm-color');
     const positionGrid = document.querySelector('.position-grid');
 
+    // Template Controls
+    const templateSelect = document.getElementById('template-select');
+    const saveTemplateBtn = document.getElementById('save-template-btn');
+    const deleteTemplateBtn = document.getElementById('delete-template-btn');
+    const loadTemplateBtn = document.getElementById('load-template-btn');
+    const templateNameInput = document.getElementById('template-name');
+
     // Export Controls
     const exportBtn = document.getElementById('export-btn');
     const namePrefixInput = document.getElementById('name-prefix');
@@ -35,6 +42,70 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Functions ---
+
+    // --- Template Management ---
+    const loadTemplates = () => {
+        const templates = JSON.parse(localStorage.getItem('watermarkTemplates') || '{}');
+        templateSelect.innerHTML = '<option value="">Select a template</option>';
+        for (const name in templates) {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            templateSelect.appendChild(option);
+        }
+    };
+
+    const saveTemplate = () => {
+        const name = templateNameInput.value.trim();
+        if (!name) {
+            alert('Please enter a name for the template.');
+            return;
+        }
+
+        const templates = JSON.parse(localStorage.getItem('watermarkTemplates') || '{}');
+        templates[name] = { ...watermarkState };
+        localStorage.setItem('watermarkTemplates', JSON.stringify(templates));
+        
+        loadTemplates();
+        templateSelect.value = name;
+        templateNameInput.value = ''; // Clear input field
+    };
+
+    const deleteTemplate = () => {
+        const name = templateSelect.value;
+        if (!name) {
+            alert('Please select a template to delete.');
+            return;
+        }
+
+        if (confirm(`Are you sure you want to delete the template "${name}"?`)) {
+            const templates = JSON.parse(localStorage.getItem('watermarkTemplates') || '{}');
+            delete templates[name];
+            localStorage.setItem('watermarkTemplates', JSON.stringify(templates));
+            loadTemplates();
+        }
+    };
+
+    const applyTemplate = (name) => {
+        const templates = JSON.parse(localStorage.getItem('watermarkTemplates') || '{}');
+        if (!templates[name]) return;
+
+        const templateState = templates[name];
+        Object.assign(watermarkState, templateState);
+
+        // Update UI controls to reflect the loaded template
+        wmTextInput.value = watermarkState.text;
+        wmSizeInput.value = watermarkState.size;
+        wmOpacityInput.value = watermarkState.opacity;
+        wmColorInput.value = watermarkState.color;
+
+        document.querySelectorAll('.pos-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.position === watermarkState.position && !watermarkState.isManualPosition);
+        });
+
+        updateWatermarkPreview();
+    };
+
 
     // Update watermark preview based on current state
     const updateWatermarkPreview = () => {
@@ -304,7 +375,20 @@ document.addEventListener('DOMContentLoaded', () => {
         progressLabel.textContent = `Exporting ${data.current} of ${data.total}...`;
     });
 
+    // Template Management Listeners
+    saveTemplateBtn.addEventListener('click', saveTemplate);
+    deleteTemplateBtn.addEventListener('click', deleteTemplate);
+    loadTemplateBtn.addEventListener('click', () => {
+        const name = templateSelect.value;
+        if (name) {
+            applyTemplate(name);
+        } else {
+            alert('Please select a template to load.');
+        }
+    });
+
     // --- Initial Setup ---
     wmTextInput.value = watermarkState.text;
     document.querySelector('.pos-btn[data-position="center"]').classList.add('active');
+    loadTemplates();
 });
