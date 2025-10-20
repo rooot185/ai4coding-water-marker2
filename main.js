@@ -76,10 +76,21 @@ function hexToRgb(hex) {
 
 // Helper function to calculate watermark position
 function calculateWatermarkPosition(imageWidth, imageHeight, textWidth, textHeight, position) {
+    if (position.isManual) {
+        // Scale manual coordinates from preview size to image size
+        const scaleX = imageWidth / position.previewWidth;
+        const scaleY = imageHeight / position.previewHeight;
+        return {
+            x: Math.round(position.x * scaleX),
+            y: Math.round(position.y * scaleY)
+        };
+    }
+
+    // Fallback to grid-based positioning
     let x = 0, y = 0;
     const margin = Math.min(imageWidth, imageHeight) * 0.05; // 5% margin
 
-    const [yPos, xPos] = position.split('-');
+    const [yPos, xPos] = position.gridPosition.split('-');
 
     // Calculate Y position
     switch (yPos) {

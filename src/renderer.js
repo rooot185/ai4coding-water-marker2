@@ -28,7 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
         size: 48,
         opacity: 0.5,
         color: '#FFFFFF',
-        position: 'center'
+        position: 'center',
+        isManualPosition: false, // Flag for manual positioning
+        manualX: 0, // X-coordinate for manual positioning
+        manualY: 0  // Y-coordinate for manual positioning
     };
 
     // --- Functions ---
@@ -40,7 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
             watermarkEl = document.createElement('div');
             watermarkEl.className = 'watermark-preview';
             previewArea.appendChild(watermarkEl);
+            // Add drag functionality
+            watermarkEl.addEventListener('mousedown', onMouseDown);
         }
+
+        // Add draggable class to enable move cursor and pointer events
+        watermarkEl.classList.add('draggable');
 
         watermarkEl.textContent = watermarkState.text;
         watermarkEl.style.fontSize = `${watermarkState.size}px`;
@@ -49,30 +57,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Reset position styles
         watermarkEl.style.top = watermarkEl.style.bottom = watermarkEl.style.left = watermarkEl.style.right = 'auto';
-        watermarkEl.style.transform = 'translate(-50%, -50%)'; // Center transform default
+        watermarkEl.style.transform = ''; // Reset transform
 
-        // Apply position styles
-        const [y, x] = watermarkState.position.split('-');
-        switch (y) {
-            case 'top': watermarkEl.style.top = '5%'; watermarkEl.style.transform = 'translateX(-50%)'; break;
-            case 'bottom': watermarkEl.style.bottom = '5%'; watermarkEl.style.transform = 'translateX(-50%)'; break;
-            default: watermarkEl.style.top = '50%'; break; // Center
-        }
-        switch (x) {
-            case 'left': watermarkEl.style.left = '5%'; watermarkEl.style.transform = y === 'center' ? 'translateY(-50%)' : ''; break;
-            case 'right': watermarkEl.style.right = '5%'; watermarkEl.style.transform = y === 'center' ? 'translateY(-50%)' : ''; break;
-            default: watermarkEl.style.left = '50%'; break; // Center
-        }
-        if (watermarkState.position === 'center') {
-             watermarkEl.style.transform = 'translate(-50%, -50%)';
-        } else if (y !== 'center' && x !== 'center') {
-            const transformX = x === 'left' ? '0' : '-100%';
-            const transformY = y === 'top' ? '0' : '-100%';
-            watermarkEl.style.transform = `translate(${transformX}, ${transformY})`;
-            if(y === 'top' && x === 'left') {watermarkEl.style.top = '5%'; watermarkEl.style.left = '5%';}
-            if(y === 'top' && x === 'right') {watermarkEl.style.top = '5%'; watermarkEl.style.right = '5%'; watermarkEl.style.left = 'auto';}
-            if(y === 'bottom' && x === 'left') {watermarkEl.style.bottom = '5%'; watermarkEl.style.left = '5%'; watermarkEl.style.top = 'auto';}
-            if(y === 'bottom' && x === 'right') {watermarkEl.style.bottom = '5%'; watermarkEl.style.right = '5%'; watermarkEl.style.left = 'auto'; watermarkEl.style.top = 'auto';}
+        if (watermarkState.isManualPosition) {
+            // Manual positioning
+            watermarkEl.style.left = `${watermarkState.manualX}px`;
+            watermarkEl.style.top = `${watermarkState.manualY}px`;
+        } else {
+            // Grid-based positioning
+            watermarkEl.style.transform = 'translate(-50%, -50%)'; // Center transform default
+            const [y, x] = watermarkState.position.split('-');
+            switch (y) {
+                case 'top': watermarkEl.style.top = '5%'; watermarkEl.style.transform = 'translateX(-50%)'; break;
+                case 'bottom': watermarkEl.style.bottom = '5%'; watermarkEl.style.transform = 'translateX(-50%)'; break;
+                default: watermarkEl.style.top = '50%'; break; // Center
+            }
+            switch (x) {
+                case 'left': watermarkEl.style.left = '5%'; watermarkEl.style.transform = y === 'center' ? 'translateY(-50%)' : ''; break;
+                case 'right': watermarkEl.style.right = '5%'; watermarkEl.style.transform = y === 'center' ? 'translateY(-50%)' : ''; break;
+                default: watermarkEl.style.left = '50%'; break; // Center
+            }
+            if (watermarkState.position === 'center') {
+                 watermarkEl.style.transform = 'translate(-50%, -50%)';
+            } else if (y !== 'center' && x !== 'center') {
+                const transformX = x === 'left' ? '0' : '-100%';
+                const transformY = y === 'top' ? '0' : '-100%';
+                watermarkEl.style.transform = `translate(${transformX}, ${transformY})`;
+                if(y === 'top' && x === 'left') {watermarkEl.style.top = '5%'; watermarkEl.style.left = '5%';}
+                if(y === 'top' && x === 'right') {watermarkEl.style.top = '5%'; watermarkEl.style.right = '5%'; watermarkEl.style.left = 'auto';}
+                if(y === 'bottom' && x === 'left') {watermarkEl.style.bottom = '5%'; watermarkEl.style.left = '5%'; watermarkEl.style.top = 'auto';}
+                if(y === 'bottom' && x === 'right') {watermarkEl.style.bottom = '5%'; watermarkEl.style.right = '5%'; watermarkEl.style.left = 'auto'; watermarkEl.style.top = 'auto';}
+            }
         }
     };
     
@@ -156,11 +171,64 @@ document.addEventListener('DOMContentLoaded', () => {
     positionGrid.addEventListener('click', (e) => {
         if (e.target.classList.contains('pos-btn')) {
             watermarkState.position = e.target.dataset.position;
+            watermarkState.isManualPosition = false; // Reset manual positioning
             document.querySelectorAll('.pos-btn').forEach(btn => btn.classList.remove('active'));
             e.target.classList.add('active');
             updateWatermarkPreview();
         }
     });
+
+    // --- Drag and Drop Watermark ---
+    let isDragging = false;
+    let dragStartX, dragStartY;
+    let watermarkStartX, watermarkStartY;
+
+    function onMouseDown(e) {
+        isDragging = true;
+        const watermarkEl = e.target;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        watermarkStartX = watermarkEl.offsetLeft;
+        watermarkStartY = watermarkEl.offsetTop;
+
+        // Deactivate position grid
+        document.querySelectorAll('.pos-btn').forEach(btn => btn.classList.remove('active'));
+        watermarkState.isManualPosition = true;
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    }
+
+    function onMouseMove(e) {
+        if (!isDragging) return;
+
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
+
+        let newX = watermarkStartX + dx;
+        let newY = watermarkStartY + dy;
+
+        // Constrain within previewArea
+        const previewRect = previewArea.getBoundingClientRect();
+        const watermarkEl = previewArea.querySelector('.watermark-preview');
+        const watermarkRect = watermarkEl.getBoundingClientRect();
+
+        if (newX < 0) newX = 0;
+        if (newY < 0) newY = 0;
+        if (newX + watermarkRect.width > previewRect.width) newX = previewRect.width - watermarkRect.width;
+        if (newY + watermarkRect.height > previewRect.height) newY = previewRect.height - watermarkRect.height;
+
+        watermarkState.manualX = newX;
+        watermarkState.manualY = newY;
+
+        updateWatermarkPreview();
+    }
+
+    function onMouseUp() {
+        isDragging = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
 
     // Export Button Listener
     exportBtn.addEventListener('click', async () => {
@@ -174,6 +242,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Get final watermark position for export
+        const watermarkEl = previewArea.querySelector('.watermark-preview');
+        const previewRect = previewArea.getBoundingClientRect();
+        const wmRect = watermarkEl.getBoundingClientRect();
+        
+        const exportPosition = {
+            isManual: watermarkState.isManualPosition,
+            gridPosition: watermarkState.position,
+            x: watermarkEl.offsetLeft,
+            y: watermarkEl.offsetTop,
+            previewWidth: previewRect.width,
+            previewHeight: previewRect.height
+        };
+
         // Collect export settings
         const exportSettings = {
             watermark: {
@@ -181,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 size: watermarkState.size,
                 opacity: watermarkState.opacity,
                 color: watermarkState.color,
-                position: watermarkState.position
+                position: exportPosition
             },
             naming: {
                 prefix: namePrefixInput.value || '',
